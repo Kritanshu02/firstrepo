@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comment Section</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+
+    .comment-section {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .comment-input {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .comment-input input {
+      width: 80%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .comment-input button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .comment-input button:hover {
+      background-color: #45a049;
+    }
+
+    .comment {
+      background-color: #f9f9f9;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      position: relative;
+    }
+
+    .comment button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    .comment .reply-input {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .comment .reply-input input {
+      width: 80%;
+    }
+
+    .comment .reply-input button {
+      padding: 5px 10px;
+      background-color: #008CBA;
+    }
+
+    .comment .reply-input button:hover {
+      background-color: #007bb5;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="comment-section">
+    <div class="comment-input">
+      <input type="text" id="commentInput" placeholder="Write a comment...">
+      <button onclick="sendComment()">Send</button>
+    </div>
+    <div id="commentsList"></div>
+  </div>
+
+  <script>
+    function sendComment() {
+      const commentInput = document.getElementById("commentInput");
+      const commentText = commentInput.value.trim();
+
+      if (commentText === "") return;  // Prevent empty comments
+
+      const commentList = document.getElementById("commentsList");
+
+      // Create comment element
+      const commentDiv = document.createElement("div");
+      commentDiv.classList.add("comment");
+
+      // Add the comment text
+      const commentContent = document.createElement("p");
+      commentContent.textContent = commentText;
+      commentDiv.appendChild(commentContent);
+
+      // Add delete button
+      const deleteButton = document.createElement("button");
+      deleteButton.textContent = "Delete";
+      deleteButton.onclick = function () {
+        commentDiv.remove();
+      };
+      commentDiv.appendChild(deleteButton);
+
+      // Add reply button
+      const replyButton = document.createElement("button");
+      replyButton.textContent = "Reply";
+      replyButton.onclick = function () {
+        showReplyInput(commentDiv);
+      };
+      commentDiv.appendChild(replyButton);
+
+      // Append the comment
+      commentList.appendChild(commentDiv);
+
+      // Clear the input field
+      commentInput.value = "";
+    }
+
+    function showReplyInput(commentDiv) {
+      const replyInputDiv = document.createElement("div");
+      replyInputDiv.classList.add("reply-input");
+
+      const replyInput = document.createElement("input");
+      replyInput.type = "text";
+      replyInput.placeholder = "Write a reply...";
+
+      const replyButton = document.createElement("button");
+      replyButton.textContent = "Reply";
+      replyButton.onclick = function () {
+        replyToComment(commentDiv, replyInput.value.trim());
+      };
+
+      replyInputDiv.appendChild(replyInput);
+      replyInputDiv.appendChild(replyButton);
+
+      commentDiv.appendChild(replyInputDiv);
+    }
+
+    function replyToComment(commentDiv, replyText) {
+      if (replyText === "") return;
+
+      const replyDiv = document.createElement("div");
+      replyDiv.classList.add("comment");
+      replyDiv.style.marginLeft = "30px"; // Indentation for reply
+
+      const replyContent = document.createElement("p");
+      replyContent.textContent = replyText;
+      replyDiv.appendChild(replyContent);
+
+      // Append the reply
+      commentDiv.appendChild(replyDiv);
+
+      // Clear the reply input
+      const replyInputDiv = commentDiv.querySelector(".reply-input");
+      replyInputDiv.querySelector("input").value = "";
+    }
+  </script>
+
+</body>
+</html>

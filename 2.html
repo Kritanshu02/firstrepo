@@ -1,135 +1,3 @@
-<!-- 
-<!DOCTYPE html>
-<html>
-
-<head>
-  <title>ToDo-List</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px;
-      background: #e9d2e2;
-    }
-
-    h1 {
-      text-decoration: underline;
-    }
-
-    #taskInput {
-      padding: 10px;
-      width: 250px;
-      border: 2px solid;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-
-    #deleteAllBtn,
-    #addBtn {
-      background: rgb(176, 137, 197);
-      color: black;
-      border: 1px solid;
-      padding: 12px 15px;
-      border-radius: 5px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .task-container {
-      margin: 30px auto;         /* Centered and spacing */
-      max-height: 300px;
-      width: 300px;              /* Decreased width */
-      overflow-y: auto;
-      padding-right: 10px;
-    }
-
-    li {
-      background: white;
-      border: 1px solid;
-      border-radius: 4px;
-      padding: 10px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    #taskList button {
-      margin-left: 10px;
-      background-color: #eee;
-      padding: 5px 10px;
-      cursor: pointer;
-      font-size: 12px;
-      border: none;
-    }
-  </style>
-</head>
-
-<body>
-
-  <h1>To-Do List</h1>
-  <div>
-    <input type="text" id="taskInput" placeholder="Enter a task">
-    <button id="addBtn">Add</button>
-    <button id="deleteAllBtn">Delete All</button>
-  </div>
-
-  <div class="task-container">
-    <ul id="taskList"></ul>
-  </div>
-
-  <script>
-    const addBtn = document.getElementById("addBtn");
-    const deleteAllBtn = document.getElementById("deleteAllBtn");
-    const taskList = document.getElementById("taskList");
-
-    addBtn.onclick = function () {
-      const input = document.getElementById("taskInput");
-      const taskText = input.value.trim();
-      if (taskText === "") return;
-
-      const li = document.createElement("li");
-
-      const span = document.createElement("span");
-      span.textContent = taskText;
-
-      const btns = document.createElement("div");
-
-      const editBtn = document.createElement("button");
-      editBtn.textContent = "Edit";
-      editBtn.onclick = function () {
-        const newText = prompt("Edit task:", span.textContent);
-        if (newText != null && newText.trim() != "") {
-          span.textContent = newText.trim();
-        }
-      };
-
-      const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "Delete";
-      deleteBtn.onclick = function () {
-        taskList.removeChild(li);
-      };
-
-      btns.appendChild(editBtn);
-      btns.appendChild(deleteBtn);
-
-      li.appendChild(span);
-      li.appendChild(btns);
-      taskList.appendChild(li);
-
-      input.value = "";
-    };
-
-    deleteAllBtn.onclick = function () {
-      taskList.innerHTML = "";
-    };
-  </script>
-
-</body>
-
-</html>
-
- -->
 <!DOCTYPE html>
 <html>
 
@@ -244,7 +112,7 @@
     function renderTasks() {
       taskList.innerHTML = "";
 
-      // Sort by priority: High > Medium > Low
+      // Sort by priority: High (1), Medium (2), Low (3)
       const priorityOrder = { High: 1, Medium: 2, Low: 3 };
       tasks.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 
@@ -252,7 +120,7 @@
         const li = document.createElement("li");
 
         const span = document.createElement("span");
-        span.textContent = `${task.text} [${task.priority}]`;
+        span.textContent = task.text;  // No priority shown
 
         const btns = document.createElement("div");
 
@@ -315,3 +183,107 @@
 </body>
 
 </html>
+
+
+
+
+<!-- <script>
+  const addBtn = document.getElementById("addBtn");
+  const deleteAllBtn = document.getElementById("deleteAllBtn");
+  const taskList = document.getElementById("taskList");
+  const input = document.getElementById("taskInput");
+  const prioritySelect = document.getElementById("prioritySelect");
+
+  const API_URL = "http://localhost:3000/tasks";
+
+  // Fetch and render tasks from JSON Server
+  async function renderTasks() {
+    const res = await fetch(API_URL);
+    let tasks = await res.json();
+
+    const priorityOrder = { High: 1, Medium: 2, Low: 3 };
+    tasks.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+
+    taskList.innerHTML = "";
+
+    tasks.forEach((task) => {
+      const li = document.createElement("li");
+
+      const span = document.createElement("span");
+      span.textContent = task.text;
+
+      const btns = document.createElement("div");
+
+      const editBtn = document.createElement("button");
+      editBtn.textContent = "Edit";
+      editBtn.onclick = async function () {
+        const newText = prompt("Edit task:", task.text);
+        if (newText && newText.trim() !== "") {
+          await fetch(`${API_URL}/${task.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: newText.trim() }),
+          });
+          renderTasks();
+        }
+      };
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "Delete";
+      deleteBtn.onclick = async function () {
+        await fetch(`${API_URL}/${task.id}`, {
+          method: "DELETE",
+        });
+        renderTasks();
+      };
+
+      btns.appendChild(editBtn);
+      btns.appendChild(deleteBtn);
+
+      li.appendChild(span);
+      li.appendChild(btns);
+      taskList.appendChild(li);
+    });
+  }
+
+  // Add new task
+  addBtn.onclick = async function () {
+    const taskText = input.value.trim();
+    const priority = prioritySelect.value;
+
+    if (taskText === "" || !priority) return;
+
+    await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: taskText, priority: priority }),
+    });
+
+    input.value = "";
+    prioritySelect.selectedIndex = 0;
+    prioritySelect.disabled = true;
+
+    renderTasks();
+  };
+
+  // Delete all tasks
+  deleteAllBtn.onclick = async function () {
+    const res = await fetch(API_URL);
+    const tasks = await res.json();
+    for (const task of tasks) {
+      await fetch(`${API_URL}/${task.id}`, {
+        method: "DELETE",
+      });
+    }
+    renderTasks();
+  };
+
+  // Enable priority dropdown only when input is not empty
+  input.addEventListener("input", () => {
+    prioritySelect.disabled = input.value.trim() === "";
+  });
+
+  // Initial render
+  renderTasks();
+</script> -->
+
